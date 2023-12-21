@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   mysqldb:
-    image: mysqldb
+    containername: mysqldb
     image: mysql
     ports:
       - "3306:3306"
