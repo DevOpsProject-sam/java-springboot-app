@@ -1,43 +1,44 @@
 pipeline {
-       agent {
+    agent {
         node {
             label 'jenkins-slave-node'
         }
     }
- 
     
     environment {
         PATH = "/opt/apache-maven-3.9.6/bin:$PATH"
     }
+    
     stages {
-        stage("build stage"){
+        stage("Build Stage") {
             steps {
-                echo "----------- build started ----------"
+                echo "----------- Build started ----------"
                 sh 'mvn clean deploy -Dmaven.test.skip=true'
-                echo "----------- build completed ----------"
+                echo "----------- Build completed ----------"
             }
         }
          
-        stage("test stage"){
-            steps{
-                echo "----------- unit test started ----------"
+        stage("Test Stage") {
+            steps {
+                echo "----------- Unit test started ----------"
                 sh 'mvn surefire-report:report'
-                echo "----------- unit test Completed ----------"
+                echo "----------- Unit test completed ----------"
             }
         }
 
-    /*    stage('SonarQube analysis') {
+        /*
+        stage('SonarQube Analysis') {
             environment {
                 scannerHome = tool 'sonar-scanner-meportal'
             }
-            steps{
+            steps {
                 withSonarQubeEnv('sonar-server-meportal') {
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
             }
         }
 
-        stage("Quality Gate"){
+        stage("Quality Gate") {
             steps {
                 script {
                     timeout(time: 1, unit: 'HOURS') { 
@@ -50,16 +51,17 @@ pipeline {
             }
         }
         */
-     stage("Artifact Publish") {
+     
+        stage("Artifact Publish") {
             steps {
                 script {
                     echo '------------- Artifact Publish Started ------------'
-                    def server = Artifactory.newServer url:"https://meportald.jfrog.io//artifactory" ,  credentialsId:"jfrog-cred"
-                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
+                    def server = Artifactory.newServer url:"https://meportald.jfrog.io/artifactory", credentialsId:"jfrog-cred"
+                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
                     def uploadSpec = """{
                         "files": [
                             {
-                                "pattern": "staging/(*)",
+                                "pattern": "staging/*",
                                 "target": "release-local-artifacts/{1}",
                                 "flat": "false",
                                 "props" : "${properties}",
@@ -74,11 +76,5 @@ pipeline {
                 }
             }   
         }
-
     }
 }
-
-
-    }
-}
-
